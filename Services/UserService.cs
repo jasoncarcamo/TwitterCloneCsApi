@@ -9,8 +9,6 @@ using TwitterCloneCs.Models;
 using TwitterCloneCs.Data;
 using System.Text;
 using Microsoft.Extensions.Configuration;
-using System.Security.Cryptography;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Identity;
 
 
@@ -31,8 +29,6 @@ namespace TwitterCloneCs.Services
 
             var hand = new JwtSecurityTokenHandler();
 
-            Console.WriteLine(user);
-
             var claimsIdentity = new ClaimsIdentity(new[]
                 {
                     new Claim(ClaimTypes.Name, user.Id.ToString()),
@@ -41,8 +37,8 @@ namespace TwitterCloneCs.Services
 
             var securityTokenDescriptor = new SecurityTokenDescriptor()
             {
-                Issuer = "https://localhost:5001/",
-                Audience = "https://localhost:5001/",
+                Issuer = "https://twitterclonecs20200402030233.azurewebsites.net/",
+                Audience = "https://twitterclonecs20200402030233.azurewebsites.net/",
                 Subject = claimsIdentity,
                 Expires = DateTime.UtcNow.AddYears(12),
                 SigningCredentials = new SigningCredentials(secret, SecurityAlgorithms.HmacSha256Signature, SecurityAlgorithms.Sha512Digest)

@@ -18,6 +18,6 @@ namespace TwitterCloneCs.Data
 
         public DbSet<Tweet> Tweet { get; set; }
 
-        public DbSet<TwitterCloneCs.Models.Follow> Follow { get; set; }
+        public DbSet<Follow> Follow { get; set; }
     }
 }

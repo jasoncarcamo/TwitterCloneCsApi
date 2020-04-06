@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ using TwitterCloneCs.Models;
 namespace TwitterCloneCs.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class TweetsController : ControllerBase
     {
@@ -42,10 +44,10 @@ namespace TwitterCloneCs.Controllers
             return tweet;
         }
 
-        // PUT: api/Tweets/5
+        // PATCH: api/Tweets/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         public async Task<IActionResult> PutTweet(int id, Tweet tweet)
         {
             if (id != tweet.Id)
@@ -80,7 +82,11 @@ namespace TwitterCloneCs.Controllers
         [HttpPost]
         public async Task<ActionResult<Tweet>> PostTweet(Tweet tweet)
         {
-            _context.Tweet.Add(tweet);
+            Tweet newTweet = tweet;
+
+            newTweet.User_id = int.Parse(User.Identity.Name);
+
+            _context.Tweet.Add(newTweet);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetTweet", new { id = tweet.Id }, tweet);

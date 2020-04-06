@@ -12,7 +12,6 @@ using TwitterCloneCs.Models;
 namespace TwitterCloneCs.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize]
     [ApiController]
     public class UsersController : ControllerBase
     {
@@ -24,31 +23,58 @@ namespace TwitterCloneCs.Controllers
         }
 
         // GET: api/Users
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUser()
         {
-            return await _context.User.ToListAsync();
-        }
-
-        // GET: api/Users/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
-        {
-            var user = await _context.User.FindAsync(id);
+            var user = await _context.User.FirstOrDefaultAsync(x => x.Id == int.Parse(User.Identity.Name));
 
             if (user == null)
             {
-                return NotFound();
+                return NotFound(new { error = "User does not exist" });
             }
 
-            return user;
+            return Ok(new
+            {
+                user = new User()
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Screen_name = user.Screen_name,
+                    Email = user.Email,
+                    DateCreated = user.DateCreated
+                }
+            });
         }
 
-        // PUT: api/Users/5
+        // GET: api/Users/:screen_name
+        [HttpGet("{screen_name}")]
+        public async Task<ActionResult<User>> GetUser(string screen_name)
+        {
+            var user = await _context.User.FirstOrDefaultAsync( x => x.Screen_name == screen_name);
+
+            if (user == null)
+            {
+                return NotFound( new { error = "User does not exist" });
+            }
+
+            return Ok( new { 
+                user = new User() 
+                { 
+                    Id = user.Id,
+                    Screen_name = user.Screen_name,
+                    Email = user.Email,
+                    DateCreated = user.DateCreated
+                } 
+            });
+        }
+
+        // PATCH: api/Users/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user)
+        [Authorize]
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> PatchtUser(int id, User user)
         {
             if (id != user.Id)
             {
@@ -79,6 +105,7 @@ namespace TwitterCloneCs.Controllers
         // POST: api/Users
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(User user)
         {
@@ -89,6 +116,7 @@ namespace TwitterCloneCs.Controllers
         }
 
         // DELETE: api/Users/5
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<ActionResult<User>> DeleteUser(int id)
         {

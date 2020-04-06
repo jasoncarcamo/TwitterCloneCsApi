@@ -31,13 +31,21 @@ namespace TwitterCloneCs.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(User user)
         {
+            System.Globalization.CultureInfo.CurrentCulture.ClearCachedData();
             UserService userService = new UserService(Configuration);
-            User dbUser = _context.User.SingleOrDefault(x => x.Email == user.Email);
+            User dbUser = _context.User.FirstOrDefault(x => x.Email == user.Email);
+            User screenNameTaken = _context.User.FirstOrDefault(x => x.Screen_name == user.Screen_name);
             User newUser = user;
+            newUser.DateCreated = DateTime.UtcNow;
 
             if(dbUser != null)
             {
                 return BadRequest(new { error = "A user exists with this email already" });
+            }
+
+            if(screenNameTaken != null)
+            {
+                return BadRequest(new { error = "screen name is already taken" });
             }
 
             newUser.Password = userService.hashPassword(user, newUser.Password);

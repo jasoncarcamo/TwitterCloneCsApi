@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TwitterCloneCs.Data;
@@ -22,6 +23,7 @@ namespace TwitterCloneCs.Controllers
         }
 
         // GET: api/Follows
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Follow>>> GetFollow()
         {
@@ -32,20 +34,21 @@ namespace TwitterCloneCs.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Follow>> GetFollow(int id)
         {
-            var follow = await _context.Follow.FindAsync(id);
+            var follows =  _context.Follow.Where( x => x.User_id == id);
 
-            if (follow == null)
+            if (follows == null)
             {
-                return NotFound();
+                return NotFound( new { error = "User does not follow anyone"});
             }
 
-            return follow;
+            return Ok( new { follows = follows});
         }
 
-        // PUT: api/Follows/5
+        // PATCH: api/Follows/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
-        [HttpPut("{id}")]
+        [Authorize]
+        [HttpPatch("{id}")]
         public async Task<IActionResult> PutFollow(int id, Follow follow)
         {
             if (id != follow.Id)
@@ -77,29 +80,53 @@ namespace TwitterCloneCs.Controllers
         // POST: api/Follows
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<Follow>> PostFollow(Follow follow)
         {
-            _context.Follow.Add(follow);
+            Follow following = await _context.Follow.FirstOrDefaultAsync(x => x.Follows == follow.Follows && x.User_id.ToString() == User.Identity.Name);
+            Follow newFollow = follow;
+
+            User user = await _context.User.FirstOrDefaultAsync(x => x.Id == newFollow.Follows);
+
+            if(user == null)
+            {
+                return BadRequest(new { error = "The user you are trying to follow does not exist" });
+            }
+
+            if(newFollow.Follows.ToString() == User.Identity.Name)
+            {
+                return BadRequest(new { error = "You can not follow yourself"});
+            }
+
+            if(following != null)
+            {
+                return BadRequest(new { error = "You follow this user already" });
+            };
+
+            newFollow.User_id = int.Parse(User.Identity.Name);
+
+            _context.Follow.Add(newFollow);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetFollow", new { id = follow.Id }, follow);
+            return Ok( new { id = newFollow.Id, user_id = User.Identity.Name });
         }
 
         // DELETE: api/Follows/5
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<ActionResult<Follow>> DeleteFollow(int id)
         {
-            var follow = await _context.Follow.FindAsync(id);
+            var follow = await _context.Follow.FirstOrDefaultAsync( x => x.Follows == id && x.User_id == int.Parse(User.Identity.Name));
             if (follow == null)
             {
-                return NotFound();
+                return NotFound( new { error = "You are not following this user"});
             }
 
             _context.Follow.Remove(follow);
             await _context.SaveChangesAsync();
 
-            return follow;
+            return Ok( new { follow = follow});
         }
 
         private bool FollowExists(int id)

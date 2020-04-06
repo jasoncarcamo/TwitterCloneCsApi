@@ -29,11 +29,11 @@ namespace TwitterCloneCs.Controllers
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
+        public async Task<ActionResult<User>> CreateUser(User user)
         {
             UserService userService = new UserService(Configuration);
             User newUser = user;
-            User dbUser = _context.User.SingleOrDefault(x => x.Email == user.Email);
+            User dbUser = await _context.User.SingleOrDefaultAsync(x => x.Email == user.Email);
 
             if(dbUser == null)
             {
@@ -51,7 +51,7 @@ namespace TwitterCloneCs.Controllers
             }            
 
             return Ok( new { 
-                token = userService.createToken(user)
+                token = userService.createToken(dbUser)
             });
         }
     }

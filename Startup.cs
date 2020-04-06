@@ -39,8 +39,8 @@ namespace TwitterCloneCs
                         ValidateIssuer = true,
                         ValidateAudience = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = "https://localhost:5001/",
-                        ValidAudience = "https://localhost:5001/",
+                        ValidIssuer = "https://twitterclonecs20200402030233.azurewebsites.net/",
+                        ValidAudience = "https://twitterclonecs20200402030233.azurewebsites.net/",
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetConnectionString("jwtSecret")))
                     };
                 });
@@ -68,7 +68,9 @@ namespace TwitterCloneCs
 
             app.UseRouting();
 
-            app.UseCors();
+            app.UseCors( builder => {
+                builder.WithOrigins("*").AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+            });
 
             app.UseAuthentication();
 
