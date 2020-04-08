@@ -23,7 +23,6 @@ namespace TwitterCloneCs.Controllers
         }
 
         // GET: api/Follows
-        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Follow>>> GetFollow()
         {

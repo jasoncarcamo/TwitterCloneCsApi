@@ -11,6 +11,8 @@ namespace TwitterCloneCs.Models
         public int Id { get; set; }
         public int Follows { get; set; }
 
+        public DateTime DateCreated { get; set; }
+
         [ForeignKey("Users")]
         public int User_id { get; set; }
     }

@@ -12,6 +12,8 @@ namespace TwitterCloneCs.Models
         public string Tweet_text { get; set; }
         public string Screen_name { get; set; }
 
+        public DateTime DateCreated { get; set; }
+
         [ForeignKey("Users")]
         public int User_id { get; set; }
     }
